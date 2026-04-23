@@ -1,0 +1,79 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Vary
+          routes:
+            - id: auth-login
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/login
+              filters:
+                - RemoveRequestHeader=Origin
+                - SetPath=/api/v1/auth/login
+
+            - id: auth-refresh
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/refresh
+              filters:
+                - RemoveRequestHeader=Origin
+                - SetPath=/api/v1/auth/refresh
+
+            - id: auth-me
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/me
+              filters:
+                - RemoveRequestHeader=Origin
+                - SetPath=/api/v1/auth/me
+
+            - id: auth-admin
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/admin/**
+              filters:
+                - RemoveRequestHeader=Origin
+                - RewritePath=/api/auth/admin/(?<segment>.*), /api/v1/admin/${segment}
+
+            - id: auth-docs-openapi
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: auth-docs-swagger-ui-html
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/swagger-ui.html
+              filters:
+                - SetPath=/swagger-ui.html
+
+            - id: auth-docs-swagger-ui
+              uri: ${DEV_AUTH_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/auth/swagger-ui/**
+              filters:
+                - RewritePath=/api/auth/swagger-ui/(?<segment>.*), /swagger-ui/${segment}
+
+            - id: shipment-service
+              uri: ${DEV_SHIPMENT_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/shipments/**
+
+            - id: tracking-service
+              uri: ${DEV_TRACKING_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/tracking/**
+              filters:
+                - RewritePath=/api/tracking/(?<segment>.*), /api/v1/tracking/${segment}
+
+app:
+  cors:
+    allowed-origins:
+      - ${DEV_UI_ORIGIN:http://localhost:*}
+      - http://127.0.0.1:*
+      - http://192.168.*:*

@@ -1,0 +1,58 @@
+services:
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  authentication-service:
+    build:
+      context: ../authentication-service
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${AUTH_DB_URL:-jdbc:postgresql://auth-db:5432/auth_db}
+      DB_USER: ${AUTH_DB_USER:-auth}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${DEV_UI_ORIGIN:-http://localhost:5173},http://127.0.0.1:5173,http://192.168.78.123:5173
+      JPA_DDL_AUTO: ${AUTH_JPA_DDL_AUTO:-update}
+      JPA_SHOW_SQL: ${AUTH_JPA_SHOW_SQL:-true}
+      SECURITY_HSTS_ENABLED: ${AUTH_SECURITY_HSTS_ENABLED:-false}
+      LOGIN_RATE_LIMIT: ${AUTH_LOGIN_RATE_LIMIT:-100}
+    expose:
+      - "8080"
+
+  api-gateway:
+    build: .
+    depends_on:
+      authentication-service:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DEV_AUTH_SERVICE_URL: http://authentication-service:8080
+      DEV_SHIPMENT_SERVICE_URL: http://localhost:8081
+      DEV_TRACKING_SERVICE_URL: http://localhost:8082
+      DEV_UI_ORIGIN: ${DEV_UI_ORIGIN:-http://localhost:5173}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+
+volumes:
+  auth_pg_data:
