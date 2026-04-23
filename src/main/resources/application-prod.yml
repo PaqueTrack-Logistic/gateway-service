@@ -1,0 +1,73 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Vary
+          routes:
+            - id: auth-login
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/login
+              filters:
+                - SetPath=/api/v1/auth/login
+
+            - id: auth-refresh
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/refresh
+              filters:
+                - SetPath=/api/v1/auth/refresh
+
+            - id: auth-me
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/me
+              filters:
+                - SetPath=/api/v1/auth/me
+
+            - id: auth-admin
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/admin/**
+              filters:
+                - RewritePath=/api/auth/admin/(?<segment>.*), /api/v1/admin/${segment}
+
+            - id: auth-docs-openapi
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: auth-docs-swagger-ui-html
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/swagger-ui.html
+              filters:
+                - SetPath=/swagger-ui.html
+
+            - id: auth-docs-swagger-ui
+              uri: ${PROD_AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/swagger-ui/**
+              filters:
+                - RewritePath=/api/auth/swagger-ui/(?<segment>.*), /swagger-ui/${segment}
+
+            - id: shipment-service
+              uri: ${PROD_SHIPMENT_SERVICE_URL}
+              predicates:
+                - Path=/api/shipments/**
+
+            - id: tracking-service
+              uri: ${PROD_TRACKING_SERVICE_URL}
+              predicates:
+                - Path=/api/tracking/**
+              filters:
+                - RewritePath=/api/tracking/(?<segment>.*), /api/v1/tracking/${segment}
+
+app:
+  cors:
+    allowed-origins:
+      - ${PROD_UI_ORIGIN}
