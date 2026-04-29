@@ -59,5 +59,7 @@ build/
 
 # Local environment variables
 .env
+
+# Local environment configuration files
+application-dev.yml
 docker-compose.yml
-src/main/resources/application-dev.yml
