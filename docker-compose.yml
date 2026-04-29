@@ -1,58 +1,52 @@
 services:
   auth-db:
     image: postgres:16-alpine
+    container_name: auth-database
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth
       POSTGRES_PASSWORD: auth
-    ports:
-      - "5432:5432"
     volumes:
       - auth_pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U auth -d auth_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+  
 
   authentication-service:
     build:
       context: ../authentication-service
+    ports:
+      - "8083:8080"
     depends_on:
       auth-db:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_URL: ${AUTH_DB_URL:-jdbc:postgresql://auth-db:5432/auth_db}
-      DB_USER: ${AUTH_DB_USER:-auth}
-      DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth}
-      JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGINS: ${DEV_UI_ORIGIN:-http://localhost:5173},http://127.0.0.1:5173,http://192.168.78.123:5173
-      JPA_DDL_AUTO: ${AUTH_JPA_DDL_AUTO:-update}
-      JPA_SHOW_SQL: ${AUTH_JPA_SHOW_SQL:-true}
-      SECURITY_HSTS_ENABLED: ${AUTH_SECURITY_HSTS_ENABLED:-false}
-      LOGIN_RATE_LIMIT: ${AUTH_LOGIN_RATE_LIMIT:-100}
-    expose:
-      - "8080"
-
-  api-gateway:
-    build: .
-    depends_on:
-      authentication-service:
         condition: service_started
-    env_file:
-      - .env
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      DEV_AUTH_SERVICE_URL: http://authentication-service:8080
-      DEV_SHIPMENT_SERVICE_URL: http://localhost:8081
-      DEV_TRACKING_SERVICE_URL: http://localhost:8082
-      DEV_UI_ORIGIN: ${DEV_UI_ORIGIN:-http://localhost:5173}
-      JWT_SECRET: ${JWT_SECRET}
+    restart: unless-stopped
+    
+
+  tracking-db:
+    image: postgres:16-alpine
+    container_name: tracking-database
+    environment:
+      POSTGRES_USER: trackinguser
+      POSTGRES_PASSWORD: trackingpassword
+      POSTGRES_DB: tracking_db
+    volumes:
+      - tracking_data:/var/lib/postgresql/data
+    
+
+  tracking-service:
+    build:
+      context: ../tracking-service
     ports:
-      - "8080:8080"
+      - "8082:8080"
+    depends_on:
+      tracking-db:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+    restart: unless-stopped
+    
 
 volumes:
   auth_pg_data:
+  tracking_data:
