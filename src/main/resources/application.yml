@@ -4,4 +4,8 @@ server:
 
 spring:
   profiles:
-    default: dev
+    default: prod
+
+logging:
+  level:
+    '[org.springframework.security]': DEBUG
