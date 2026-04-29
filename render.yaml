@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: paquetrack-gateway
+    env: java
+    plan: standard
+    buildCommand: ./mvnw clean package -DskipTests -Pprod
+    startCommand: java -jar target/apigateway-0.0.1-SNAPSHOT.jar
+    healthCheckPath: /actuator/health
+    
+    envVars:
+      - key: PORT
+        value: 8080
+      
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      
+      # AUTH SERVICE
+      - key: PROD_AUTH_SERVICE_URL
+        sync: false
+      
+      # SHIPMENT SERVICE
+      - key: PROD_SHIPMENT_SERVICE_URL
+        sync: false
+      
+      # TRACKING SERVICE
+      - key: PROD_TRACKING_SERVICE_URL
+        sync: false
+      
+      # UI ORIGIN (CORS)
+      - key: PROD_UI_ORIGIN
+        sync: false
+      
+      # JWT SECRET (CONFIDENCIAL)
+      - key: JWT_SECRET_PROD
+        sync: false
+
+    # Configuración de escalado
+    numInstances: 1
+    autoDeploy: true
+    maxShutdownDelay: 30
+
+# Nota: Para variables sensibles como JWT_SECRET_PROD,
+# es recomendable configurarlas directamente en el panel de Render
+# en lugar de incluirlas en este archivo (envVars sync: false)

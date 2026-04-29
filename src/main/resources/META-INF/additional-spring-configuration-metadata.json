@@ -4,6 +4,11 @@
       "name": "app.cors.allowed-origins",
       "type": "java.util.List<java.lang.String>",
       "description": "Allowed CORS origins for the gateway UI."
+    },
+    {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "JWT secret key for token validation."
     }
   ]
 }
