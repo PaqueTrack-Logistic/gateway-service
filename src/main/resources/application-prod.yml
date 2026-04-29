@@ -74,7 +74,7 @@ spring:
 app:
   cors:
     allowed-origins:
-      - ${PROD_UI_ORIGIN:https://midominio.com}
+      - ${PROD_UI_ORIGIN}
   jwt:
     secret: ${JWT_SECRET_PROD}
 
