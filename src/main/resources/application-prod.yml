@@ -60,8 +60,6 @@ spring:
           uri: ${PROD_SHIPMENT_SERVICE_URL}
           predicates:
             - Path=/api/shipments/**
-          filters:
-            - StripPrefix=1
 
         - id: tracking-service
           uri: ${PROD_TRACKING_SERVICE_URL}
