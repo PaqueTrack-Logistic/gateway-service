@@ -78,5 +78,7 @@ app:
 
 logging:
   level:
-    '[com.paquetrack.apigateway]': INFO
-    '[org.springframework.security]': WARN
+    com.paquetrack.apigateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
