@@ -65,9 +65,6 @@ spring:
           uri: ${PROD_TRACKING_SERVICE_URL}
           predicates:
             - Path=/api/tracking/**
-          filters:
-            - StripPrefix=1
-            - PrefixPath=/api/v1/tracking
 
 app:
   cors:
