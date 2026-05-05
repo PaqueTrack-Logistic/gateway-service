@@ -60,11 +60,14 @@ spring:
           uri: ${PROD_SHIPMENT_SERVICE_URL}
           predicates:
             - Path=/api/shipments/**
+         
 
         - id: tracking-service
           uri: ${PROD_TRACKING_SERVICE_URL}
           predicates:
             - Path=/api/tracking/**
+          filters:
+            - RewritePath=/api/tracking/(?<segment>.*), /api/v1/tracking/${segment}
 
 app:
   cors:

@@ -37,7 +37,8 @@ public class SecurityConfig {
                                 "/api/auth/v3/api-docs",
                                 "/api/auth/v3/api-docs/**",
                                 "/api/auth/swagger-ui/**",
-                                "/api/auth/swagger-ui.html")
+                                "/api/auth/swagger-ui.html",
+                                "/api/tracking/eventTypes")
                         .permitAll()
                         .anyExchange().authenticated()
                 )
